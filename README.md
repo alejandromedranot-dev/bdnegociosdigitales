@@ -1,3 +1,4 @@
+
 # Bases de Datos para Negocios Digitales
 
 Este README explora los pilares fundamentales de las bases de datos en el contexto de los negocios digitales, abarcando desde la gestión de infraestructura hasta las técnicas avanzadas de manipulación y la adopción de tecnologías NoSQL.
@@ -152,5 +153,4 @@ Las bases de datos son el cimiento sobre el que se construyen los negocios digit
 ---
 
 ![Imagen Principal](./img/imagenprincipal.png "Base de Datos para negocios digitales")
-
 
