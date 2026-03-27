@@ -313,3 +313,212 @@ SELECT @name AS [NOMBRE DEL CLIENTE];
 
 SIRVE PARA EVALUAR CONDICIONES COMO UN SWITCH O IF MUTIPLE
 
+```sql
+SELECT  
+UPPER(c.CompanyName) AS [CompanyName], 
+UPPER(c.Country) AS [Country], 
+UPPER(c.City) AS [City], 
+UPPER(ISNULL(c.Region, 'SIN REGION')) AS [REGION LIMPIA], 
+LTRIM( UPPER(CONCAT(e.firstName, ' ', e.LastName))) AS [FULL NAME],
+ROUND(SUM(od.Quantity * od.UnitPrice), 2) AS TOTAL,
+CASE 
+    WHEN SUM(od.Quantity * od.UnitPrice) >=30000 AND 
+    SUM(od.Quantity * od.UnitPrice) <= 60000 THEN 'GOLD'
+    WHEN SUM(od.Quantity * od.UnitPrice) >=10000 AND 
+    SUM(od.Quantity * od.UnitPrice) >= 30000 THEN 'SILVER'
+    ELSE 'BRONCE' 
+    END AS [MEDALLONES]
+FROM Northwind.dbo.Customers AS c
+INNER JOIN Northwind.dbo.Orders AS o
+ON c.CustomerID = o.CustomerID
+INNER JOIN [Order Details] AS od
+ON o.OrderID = od.OrderID
+INNER JOIN Employees AS e
+ON e.EmployeeID = o.EmployeeID
+WHERE CONCAT(e.firstName, ' ', e.LastName) = UPPER('ANDREW FULLER')
+AND UPPER(ISNULL(c.Region, 'Sin region')) = UPPER('sin region')
+GROUP BY c.CompanyName, c.Country, c.City, c.Region,e.FirstName, e.LastName 
+ORDER BY [FULL NAME], [TOTAL] DESC
+GO
+
+```
+
+5. Try ... catch 
+
+Manejo de errores o EXCEP en tiempo de ejecución y manejar lo que sucede 
+cuando ocurren
+
+SINTAXIS
+
+```sql
+BEGIN TRY 
+    --CODIGO UE PUEDE GENERAR UN ERROR
+END TRY
+
+BEGIN CATCH
+    --CODIGO QUE SE EJECUTA SI OCURRE UN ERROR
+END CATCH
+``` 
+
+- ¿Cómo funciona?
+
+1. SQL ejecuta todo lo que esta dentro del TRY
+2. Si ocurre un error:
+    - se detiene la ejecución del TRY
+    - salta automaticamente al CATCH
+3. En el CATCH se puede:
+    - Mostrar mensajes
+    - Registrar errores
+    - revertir transacciones
+
+    **OBTENER INFORMACION DEL ERROR**
+
+    Dentro del CATCH , SQL SERVER tiene funciones especiales
+
+ | Función | Descripción |
+| :--- | :--- |
+| ERROR_MESSAGE() | MENSAJE DE ERROR |
+| ERROR_NUMBER() | MUMERO DE ERROR |
+| ERROR_LINE()   |LINEA DONDE OCURRIO |
+| ERROR_PROCEDURE() | PROCEDIMIENTO |
+| ERROR_SEVERITY() | NIVEL DE GRAVEDAD |
+| ERROR_STATE() | ESTADO DEL ERROR |
+
+```sql
+--SIN TRY CATCH
+SELECT 10/0;
+
+--CONTR TRY CATCH
+BEGIN TRY
+SELECT 10/0;
+END TRY
+BEGIN CATCH
+    PRINT 'OCURRIÓ UN ERROR'
+END CATCH
+
+SELECT *
+FROM Products
+
+CREATE TABLE clientes2 (
+    id INT PRIMARY KEY,
+    nombre VARCHAR (30)
+)
+
+
+INSERT INTO clientes2
+VALUES (1, 'PANFILO')
+GO
+
+BEGIN TRY
+    INSERT INTO clientes2
+    VALUES (1, 'SILVANO')
+END TRY
+BEGIN CATCH
+    PRINT 'ERROR AL INSERTAR: ' + ERROR_MESSAGE();
+    PRINT 'ERROR EN LA LINEA: ' + CAST(ERROR_LINE() AS VARCHAR);
+END CATCH
+
+BEGIN TRANSACTION
+
+INSERT INTO clientes2
+VALUES (3, 'CARLOS');
+
+SELECT * FROM clientes2
+
+COMMIT;
+ROLLBACK;
+
+
+--EJEMPLO DE USO DE TRANSACCIONES CON EL USO DE TRY CATCH
+
+SELECT * FROM clientes2
+
+BEGIN TRY
+
+    BEGIN TRANSACTION;
+    INSERT INTO clientes2 
+    VALUES (4, 'VALDRANO')
+    INSERT INTO clientes2
+    VALUES (5, 'ROLES ALINA')
+    COMMIT;
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 1
+    BEGIN
+        ROLLBACK;
+    END
+    PRINT 'SE HIZO ROLLBACK POR ERROR'
+    PRINT 'ERROR: ' + ERROR_MESSAGE();
+END CATCH  
+GO
+
+--CREAR UN STORE PROCEDURE QUE INSERTE UN CLIENTE, CON LAS VALIDACIONES NECESARIAS
+
+CREATE OR ALTER PROC Usp_insetar_cliente
+    @id INT,
+    @nombre VARCHAR(30)
+
+AS
+BEGIN
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        INSERT INTO clientes2
+        VALUES (@id, @nombre);
+        COMMIT;
+        PRINT 'CLIENTE INSERTADO';
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 1
+        BEGIN
+            ROLLBACK;
+        END
+        PRINT 'ERROR: ' + ERROR_MESSAGE();
+    END CATCH
+END
+
+EXEC Usp_insetar_cliente @id= 4, @nombre= 'pedro'
+
+SELECT * FROM clientes2
+
+UPDATE clientes2
+SET nombre = 'AMERICO AZUL'
+WHERE id = 10
+
+IF @@ROWCOUNT < 1
+BEGIN
+    PRINT @@ROWCOUNT;
+    PRINT 'NO EXITE EL CLEINTE'
+END
+ELSE 
+    PRINT 'CLIENTE ACTUALIZADO'
+
+    CREATE TABLE teams
+    (
+        id INT NOT NULL IDENTITY PRIMARY KEY,
+        nombre NVARCHAR(15)
+    )
+
+    INSERT INTO teams (nombre)
+        VALUES ('CRUZ AZUL')
+
+    --FORMA DE OBTENER UN IDENTITY INSERTADO FORMA 1
+    DECLARE @id_insertado INT 
+    SET @id_insertado = @@IDENTITY
+    PRINT 'ID INSERTADO: ' + CAST(@id_insertado AS VARCHAR)
+    SELECT @id_insertado = @@IDENTITY
+    PRINT 'ID INSERTADO FORMA 2: ' + CAST(@id_insertado AS VARCHAR)
+
+     --FORMA DE OBTENER UN IDENTITY INSERTADO FORMA 1
+
+      INSERT INTO teams (nombre)
+        VALUES ('AMIERDICA')
+
+    DECLARE @id_insertado2 INT 
+    SET @id_insertado2 = SCOPE_IDENTITY();
+    PRINT 'ID INSERTADO: ' + CAST(@id_insertado2 AS VARCHAR)
+    SELECT @id_insertado2 = SCOPE_IDENTITY();
+    PRINT 'ID INSERTADO FORMA 2: ' + CAST(@id_insertado2 AS VARCHAR)
+
+    SELECT * FROM teams
+```
