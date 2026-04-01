@@ -107,6 +107,37 @@ Una vez finalizado el proceso del TRY, el CATCH opera **SOLO EN CASO** de que al
 
 ![This is an alt text.](/img/EXEC.png "Crear base.")
 
+> TABLA TYPE 
+
+Un User-Defined Table Type es una plantilla de tabla que definimos en SQL Server para luego usarla como un parametro dentro del Stored Procedure
+
+##### Sintaxis
+
+```sql
+
+CREATE TYPE tipo_detalle_venta AS TABLE (
+    Nombre_producto NVARCHAR(40),
+    Cantidad_vendida INT
+)
+```
+
+Dentro de un SP:
+
+```sql
+    CREATE OR ALTER PROCEDURE usp_agregar_venta
+
+    @id_cliente NCHAR(5), 
+    @detalles tipo_detalle_venta READONLY
+    AS
+    BEGIN
+    INSERT INTO Ventas(nombre_producto, cantidad, id_cliente)
+    SELECT nombre_producto, cantidad, @id_cliente
+    FROM @detalles
+END;
+
+```
+
+
 
 
 

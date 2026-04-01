@@ -519,6 +519,6 @@ ELSE
     PRINT 'ID INSERTADO: ' + CAST(@id_insertado2 AS VARCHAR)
     SELECT @id_insertado2 = SCOPE_IDENTITY();
     PRINT 'ID INSERTADO FORMA 2: ' + CAST(@id_insertado2 AS VARCHAR)
-
+    
     SELECT * FROM teams
 ```
