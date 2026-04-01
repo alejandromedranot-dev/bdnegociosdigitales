@@ -43,7 +43,7 @@ GO
 USE bdpracticas 
 GO
 
-CREATE TABLE catProducto
+CREATE TABLE catProducto1
 (
     id_producto INT IDENTITY,
     nombre_producto NVARCHAR(40) NOT NULL,
@@ -63,7 +63,7 @@ FROM Northwind.dbo.Products
 SELECT *
 FROM catProducto
 
-CREATE TABLE catCliente
+CREATE TABLE catCliente1
 (
     id_cliente NCHAR(5) NOT NULL,
     nombre_cliente NVARCHAR (40) NOT NULL,
@@ -188,7 +188,7 @@ GO
 
 
 -- 1. Definir el Tipo de Tabla que solo recibe nombres
-CREATE TYPE tipo_nombres_productos AS TABLE (
+CREATE TYPE tipo_nombres_productos1 AS TABLE (
     nombre_producto NVARCHAR(40)
 );
 GO
